@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY DEFAULT 1,
+    start_weight NUMERIC NOT NULL DEFAULT 93,
+    goal_weight NUMERIC NOT NULL DEFAULT 82,
+    height INTEGER NOT NULL DEFAULT 180,
+    roster_start DATE NOT NULL DEFAULT CURRENT_DATE,
+    cigs_per_day INTEGER NOT NULL DEFAULT 15,
+    price_per_pack INTEGER NOT NULL DEFAULT 900,
+    quit_date DATE,
+    CHECK (id = 1)
+);
+
+INSERT INTO settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS weight_logs (
+    id SERIAL PRIMARY KEY,
+    log_date DATE NOT NULL UNIQUE,
+    weight NUMERIC NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS checklist_items (
+    id SERIAL PRIMARY KEY,
+    item_date DATE NOT NULL,
+    text TEXT NOT NULL,
+    done BOOLEAN NOT NULL DEFAULT FALSE,
+    sort_order INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_checklist_date ON checklist_items(item_date);
+
+CREATE TABLE IF NOT EXISTS cravings (
+    id SERIAL PRIMARY KEY,
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    intensity INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS relapses (
+    id SERIAL PRIMARY KEY,
+    relapse_date DATE NOT NULL DEFAULT CURRENT_DATE
+);

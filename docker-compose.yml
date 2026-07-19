@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fitops
+      POSTGRES_PASSWORD: fitops
+      POSTGRES_DB: fitops
+    ports:
+      - "5432:5432"
+    volumes:
+      - fitops_pg_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://fitops:fitops@db:5432/fitops?sslmode=disable
+      APP_PASSWORD: changeme
+      AUTH_SECRET: local-dev-secret-change-me
+
+volumes:
+  fitops_pg_data:
