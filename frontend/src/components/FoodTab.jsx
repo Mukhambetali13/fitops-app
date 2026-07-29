@@ -250,9 +250,9 @@ export default function FoodTab() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-2 bg-bg border border-line hover:border-accent text-cream rounded-xl text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-3 bg-panelAlt border border-line hover:border-go text-cream rounded-xl text-xs font-semibold transition-colors"
           >
-            <Camera size={16} className="text-accent" />
+            <Camera size={18} className="text-go" />
             <span>{previewUrl ? "Сменить фото" : "Загрузить фото"}</span>
           </button>
 
@@ -260,17 +260,17 @@ export default function FoodTab() {
             type="button"
             onClick={handleAnalyze}
             disabled={analyzing || (!textInput.trim() && !selectedImage)}
-            className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-accent hover:opacity-90 disabled:opacity-50 text-bg font-bold rounded-xl text-xs font-mono transition-all shadow-md"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-go hover:bg-[#34B87D] disabled:opacity-40 text-bg font-extrabold rounded-xl text-sm font-sans transition-all shadow-md active:scale-95 cursor-pointer min-h-[44px]"
           >
             {analyzing ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Анализируем...</span>
+                <Loader2 size={18} className="animate-spin text-bg" />
+                <span className="font-extrabold text-bg text-sm">Анализируем...</span>
               </>
             ) : (
               <>
-                <Sparkles size={16} />
-                <span>Распознать ккал</span>
+                <Sparkles size={18} className="text-bg" />
+                <span className="font-extrabold text-bg text-sm">Распознать ккал</span>
               </>
             )}
           </button>
@@ -279,9 +279,9 @@ export default function FoodTab() {
 
       {/* AI Result Card for Confirmation */}
       {aiResult && (
-        <div className="p-4 bg-panel border-2 border-accent/60 rounded-2xl space-y-3 animate-fadeIn">
+        <div className="p-4 bg-panel border-2 border-go/60 rounded-2xl space-y-3 animate-fadeIn">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-accent flex items-center gap-1.5">
+            <h3 className="text-sm font-bold text-go flex items-center gap-1.5">
               <Check size={16} /> Результат распознавания AI
             </h3>
             <button
@@ -371,10 +371,10 @@ export default function FoodTab() {
 
             <button
               onClick={handleSaveLog}
-              className="w-full py-2.5 bg-accent hover:opacity-90 text-bg font-bold rounded-xl text-xs font-mono transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 bg-go hover:bg-[#34B87D] text-bg font-extrabold rounded-xl text-sm font-sans transition-all flex items-center justify-center gap-2 mt-2 shadow-md active:scale-95 cursor-pointer min-h-[44px]"
             >
-              <Plus size={16} />
-              Сохранить в дневник питания
+              <Plus size={18} className="text-bg" />
+              <span className="font-extrabold text-bg text-sm">Сохранить в дневник питания</span>
             </button>
           </div>
         </div>

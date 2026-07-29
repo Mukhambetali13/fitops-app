@@ -125,10 +125,10 @@ export default function WorkoutsTab() {
                 <button
                   onClick={handleAskAi}
                   disabled={loadingAi}
-                  className="px-3.5 py-2 bg-accent hover:opacity-90 disabled:opacity-50 text-bg font-bold rounded-xl text-xs font-mono transition-all flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-go hover:bg-[#34B87D] disabled:opacity-40 text-bg font-extrabold rounded-xl text-xs font-sans transition-all flex items-center gap-1.5 shrink-0 shadow-md active:scale-95 cursor-pointer min-h-[38px]"
                 >
-                  {loadingAi ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                  <span>Спросить</span>
+                  {loadingAi ? <Loader2 size={16} className="animate-spin text-bg" /> : <Sparkles size={16} className="text-bg" />}
+                  <span className="font-extrabold text-bg text-xs">Спросить</span>
                 </button>
               </div>
 
