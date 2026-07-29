@@ -46,7 +46,7 @@ export default function WorkoutsTab() {
       <div className="p-3.5 bg-panel border border-line rounded-2xl flex items-center justify-between">
         <div>
           <div className="text-sm font-bold text-cream">Каталог техник и упражнений</div>
-          <div className="text-xs text-muted">Разбор техники, ответы AI Тренера и подборки YouTube Shorts</div>
+          <div className="text-xs text-muted">Встроенный плеер видео-техники, разбор ошибок и AI Тренер</div>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default function WorkoutsTab() {
       {/* Technique & Video Modal */}
       {selectedExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-panel border border-line rounded-3xl w-full max-w-[440px] max-h-[88vh] overflow-y-auto p-5 space-y-4 shadow-2xl relative">
+          <div className="bg-panel border border-line rounded-3xl w-full max-w-[440px] max-h-[90vh] overflow-y-auto p-5 space-y-4 shadow-2xl relative">
             {/* Modal Header */}
             <div className="flex justify-between items-start border-b border-line/60 pb-3">
               <div>
@@ -127,7 +127,7 @@ export default function WorkoutsTab() {
                 }`}
               >
                 <Video size={14} />
-                <span>YouTube Shorts</span>
+                <span>Встроенный Плеер</span>
               </button>
             </div>
 
@@ -188,63 +188,68 @@ export default function WorkoutsTab() {
               </div>
             )}
 
-            {/* TAB 2: YouTube Shorts */}
+            {/* TAB 2: Embedded YouTube Shorts Player */}
             {modalTab === "shorts" && (
               <div className="space-y-3 animate-fadeIn">
-                <div className="p-4 bg-gradient-to-b from-[#282828] to-bg border border-red-900/50 rounded-2xl space-y-3 text-center">
-                  <div className="w-12 h-12 bg-[#FF0000] text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-red-900/30">
-                    <Play size={24} fill="white" className="ml-0.5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Видео-техника на YouTube Shorts</h4>
-                    <p className="text-xs text-muted mt-1">
-                      Смотрите короткие наглядные ролики с правильной биомеханикой для упражнения «{selectedExercise.name}»
-                    </p>
+                <div className="p-3 bg-bg/80 border border-line rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono text-white">
+                    <span className="flex items-center gap-1.5 font-bold text-red-500">
+                      <Play size={16} fill="#FF0000" />
+                      Видео-техника на сайте:
+                    </span>
+                    <span className="text-[10px] text-muted font-mono">{selectedExercise.name}</span>
                   </div>
 
-                  {/* Main YouTube Shorts Button */}
+                  {/* Embedded YouTube Frame */}
+                  <div className="relative w-full aspect-[9/16] max-h-[380px] bg-black rounded-2xl overflow-hidden border border-line shadow-2xl mx-auto flex items-center justify-center">
+                    {selectedExercise.videoId ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${selectedExercise.videoId}?autoplay=0&rel=0&modestbranding=1`}
+                        title={selectedExercise.name}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full rounded-2xl border-none"
+                      />
+                    ) : (
+                      <div className="p-4 text-center text-muted text-xs font-mono">
+                        Видеоплеер недоступен
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Optional External Link Button */}
                   <a
                     href={getYoutubeShortsUrl("техника shorts")}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-3 px-4 bg-[#FF0000] hover:bg-[#D90000] text-white font-extrabold rounded-xl text-xs font-sans flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer decoration-none border-none"
+                    className="w-full py-2.5 px-3 bg-panelAlt hover:bg-line text-cream font-semibold rounded-xl text-xs font-sans flex items-center justify-center gap-1.5 transition-colors decoration-none"
                   >
-                    <Play size={16} fill="white" />
-                    <span>Смотреть Shorts на YouTube</span>
+                    <span>Открыть в приложении YouTube</span>
                     <ExternalLink size={14} />
                   </a>
                 </div>
 
-                {/* Specific Topic Chips */}
-                <div className="space-y-2">
-                  <div className="text-[11px] font-mono text-muted uppercase">Быстрые подборки видео:</div>
-                  <div className="grid grid-cols-1 gap-2 text-xs">
+                {/* Quick Video Search Topics */}
+                <div className="space-y-1.5">
+                  <div className="text-[11px] font-mono text-muted uppercase">Другие ролики на YouTube:</div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <a
                       href={getYoutubeShortsUrl("как правильно делать shorts")}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 bg-bg/60 hover:bg-bg border border-line hover:border-red-500 rounded-xl text-cream flex items-center justify-between group transition-colors decoration-none"
+                      className="p-2 bg-bg/60 hover:bg-bg border border-line rounded-lg text-cream flex items-center justify-between transition-colors decoration-none"
                     >
-                      <span>🎯 Идеальная техника движения (Shorts)</span>
-                      <ExternalLink size={14} className="text-muted group-hover:text-white" />
+                      <span>🎯 Разбор техники</span>
+                      <ExternalLink size={12} className="text-muted" />
                     </a>
                     <a
                       href={getYoutubeShortsUrl("ошибки техника shorts")}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2.5 bg-bg/60 hover:bg-bg border border-line hover:border-red-500 rounded-xl text-cream flex items-center justify-between group transition-colors decoration-none"
+                      className="p-2 bg-bg/60 hover:bg-bg border border-line rounded-lg text-cream flex items-center justify-between transition-colors decoration-none"
                     >
-                      <span>⚠️ Опасные ошибки в технике (Shorts)</span>
-                      <ExternalLink size={14} className="text-muted group-hover:text-white" />
-                    </a>
-                    <a
-                      href={getYoutubeShortsUrl("разбор биомеханика shorts")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2.5 bg-bg/60 hover:bg-bg border border-line hover:border-red-500 rounded-xl text-cream flex items-center justify-between group transition-colors decoration-none"
-                    >
-                      <span>🏋️ Подробный разбор анатомии (Shorts)</span>
-                      <ExternalLink size={14} className="text-muted group-hover:text-white" />
+                      <span>⚠️ Главные ошибки</span>
+                      <ExternalLink size={12} className="text-muted" />
                     </a>
                   </div>
                 </div>
