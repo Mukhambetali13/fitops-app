@@ -92,14 +92,14 @@ type groqMessage struct {
 }
 
 type groqResponseFormat struct {
-	Type string `json:"type"`
+	Type string `json:"type,omitempty"`
 }
 
 type groqRequest struct {
-	Model          string             `json:"model"`
-	Messages       []groqMessage      `json:"messages"`
-	ResponseFormat groqResponseFormat `json:"response_format,omitempty"`
-	Temperature    float64            `json:"temperature"`
+	Model          string              `json:"model"`
+	Messages       []groqMessage       `json:"messages"`
+	ResponseFormat *groqResponseFormat `json:"response_format,omitempty"`
+	Temperature    float64             `json:"temperature"`
 }
 
 type groqResponse struct {
@@ -151,7 +151,7 @@ func analyzeWithGroq(ctx context.Context, apiKey, userText, imageBase64, imageMi
 				Content: contentParts,
 			},
 		},
-		ResponseFormat: groqResponseFormat{Type: "json_object"},
+		ResponseFormat: &groqResponseFormat{Type: "json_object"},
 		Temperature:    0.2,
 	}
 
