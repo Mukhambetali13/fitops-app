@@ -113,7 +113,11 @@ type groqResponse struct {
 func analyzeWithGroq(ctx context.Context, apiKey, userText, imageBase64, imageMime string) (*FoodAIResponse, error) {
 	model := os.Getenv("GROQ_MODEL")
 	if model == "" {
-		model = "llama-3.2-11b-vision-preview"
+		if imageBase64 != "" {
+			model = "qwen/qwen3.6-27b"
+		} else {
+			model = "llama-3.3-70b-versatile"
+		}
 	}
 
 	prompt := systemPrompt
