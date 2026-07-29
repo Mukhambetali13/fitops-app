@@ -43,4 +43,9 @@ export const api = {
   logRelapse: () => request("/smoking/relapse", { method: "POST" }),
   logCraving: (intensity) => request("/smoking/craving", { method: "POST", body: JSON.stringify({ intensity }) }),
   putSmokingSettings: (body) => request("/smoking/settings", { method: "PUT", body: JSON.stringify(body) }),
+  analyzeFood: (body) => request("/nutrition/analyze", { method: "POST", body: JSON.stringify(body) }),
+  getTodayFood: () => request("/nutrition/today"),
+  logFood: (body) => request("/nutrition/log", { method: "POST", body: JSON.stringify(body) }),
+  deleteFoodLog: (id) => request(`/nutrition/log/${id}`, { method: "DELETE" }),
+  getWorkoutAdvice: (exerciseName, question) => request("/workout/advice", { method: "POST", body: JSON.stringify({ exerciseName, question }) }),
 };

@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import BottomNav from "./components/BottomNav";
 import { Badge } from "./components/Primitives";
 import HomeTab from "./components/HomeTab";
+import FoodTab from "./components/FoodTab";
 import RosterTab from "./components/RosterTab";
 import WorkoutsTab from "./components/WorkoutsTab";
 import SmokingTab from "./components/SmokingTab";
@@ -58,6 +59,7 @@ export default function App() {
       </div>
 
       {tab === "home" && <HomeTab today={today} settings={settings} weights={weights} smoking={smoking} onChanged={loadAll} />}
+      {tab === "food" && <FoodTab />}
       {tab === "roster" && <RosterTab roster={roster} settings={settings} onChanged={loadAll} />}
       {tab === "workouts" && <WorkoutsTab />}
       {tab === "smoke" && <SmokingTab smoking={smoking} onChanged={loadAll} />}

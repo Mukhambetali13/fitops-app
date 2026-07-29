@@ -11,6 +11,9 @@ import (
 //go:embed migrations/001_init.sql
 var initSQL string
 
+//go:embed migrations/002_food_logs.sql
+var foodLogsSQL string
+
 var pool *pgxpool.Pool
 
 func connectDB(ctx context.Context, databaseURL string) *pgxpool.Pool {
@@ -23,7 +26,10 @@ func connectDB(ctx context.Context, databaseURL string) *pgxpool.Pool {
 		log.Fatalf("db connect: %v", err)
 	}
 	if _, err := p.Exec(ctx, initSQL); err != nil {
-		log.Fatalf("migration failed: %v", err)
+		log.Fatalf("migration init failed: %v", err)
+	}
+	if _, err := p.Exec(ctx, foodLogsSQL); err != nil {
+		log.Fatalf("migration food_logs failed: %v", err)
 	}
 	return p
 }

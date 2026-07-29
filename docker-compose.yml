@@ -21,6 +21,7 @@ services:
       DATABASE_URL: postgres://fitops:fitops@db:5432/fitops?sslmode=disable
       APP_PASSWORD: changeme
       AUTH_SECRET: local-dev-secret-change-me
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
 
 volumes:
   fitops_pg_data:

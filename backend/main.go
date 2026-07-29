@@ -59,6 +59,13 @@ func main() {
 	mux.HandleFunc("POST /api/smoking/craving", requireAuth(smokingCravingHandler))
 	mux.HandleFunc("PUT /api/smoking/settings", requireAuth(smokingSettingsHandler))
 
+	mux.HandleFunc("POST /api/nutrition/analyze", requireAuth(nutritionAnalyzeHandler))
+	mux.HandleFunc("GET /api/nutrition/today", requireAuth(nutritionTodayHandler))
+	mux.HandleFunc("POST /api/nutrition/log", requireAuth(nutritionLogHandler))
+	mux.HandleFunc("DELETE /api/nutrition/log/{id}", requireAuth(nutritionLogItemHandler))
+
+	mux.HandleFunc("POST /api/workout/advice", requireAuth(workoutAdviceHandler))
+
 	// Serve the built React app for everything else (SPA).
 	distFS, err := fs.Sub(webFS, "web/dist")
 	if err != nil {

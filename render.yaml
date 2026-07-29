@@ -12,3 +12,5 @@ services:
         sync: false
       - key: AUTH_SECRET
         generateValue: true
+      - key: GROQ_API_KEY
+        sync: false

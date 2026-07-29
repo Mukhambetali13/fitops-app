@@ -15,14 +15,15 @@ type Settings struct {
 	CigsPerDay   int     `json:"cigsPerDay"`
 	PricePerPack int     `json:"pricePerPack"`
 	QuitDate     *string `json:"quitDate"`
+	CalorieGoal  int     `json:"calorieGoal"`
 }
 
 func getSettings(ctx context.Context) (Settings, error) {
 	var s Settings
 	var rosterStart time.Time
 	var quitDate *time.Time
-	err := pool.QueryRow(ctx, `SELECT start_weight, goal_weight, height, roster_start, cigs_per_day, price_per_pack, quit_date FROM settings WHERE id=1`).
-		Scan(&s.StartWeight, &s.GoalWeight, &s.Height, &rosterStart, &s.CigsPerDay, &s.PricePerPack, &quitDate)
+	err := pool.QueryRow(ctx, `SELECT start_weight, goal_weight, height, roster_start, cigs_per_day, price_per_pack, quit_date, calorie_goal FROM settings WHERE id=1`).
+		Scan(&s.StartWeight, &s.GoalWeight, &s.Height, &rosterStart, &s.CigsPerDay, &s.PricePerPack, &quitDate, &s.CalorieGoal)
 	if err != nil {
 		return s, err
 	}
@@ -30,6 +31,9 @@ func getSettings(ctx context.Context) (Settings, error) {
 	if quitDate != nil {
 		q := quitDate.Format("2006-01-02")
 		s.QuitDate = &q
+	}
+	if s.CalorieGoal == 0 {
+		s.CalorieGoal = 2000
 	}
 	return s, nil
 }
@@ -50,8 +54,11 @@ func settingsHandler(w http.ResponseWriter, r *http.Request) {
 			writeError(w, 400, "неверные данные")
 			return
 		}
-		_, err := pool.Exec(ctx, `UPDATE settings SET start_weight=$1, goal_weight=$2, height=$3, roster_start=$4, cigs_per_day=$5, price_per_pack=$6 WHERE id=1`,
-			body.StartWeight, body.GoalWeight, body.Height, body.RosterStart, body.CigsPerDay, body.PricePerPack)
+		if body.CalorieGoal <= 0 {
+			body.CalorieGoal = 2000
+		}
+		_, err := pool.Exec(ctx, `UPDATE settings SET start_weight=$1, goal_weight=$2, height=$3, roster_start=$4, cigs_per_day=$5, price_per_pack=$6, calorie_goal=$7 WHERE id=1`,
+			body.StartWeight, body.GoalWeight, body.Height, body.RosterStart, body.CigsPerDay, body.PricePerPack, body.CalorieGoal)
 		if err != nil {
 			writeError(w, 500, "не удалось сохранить настройки")
 			return
@@ -367,3 +374,165 @@ func smokingSettingsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, map[string]bool{"ok": true})
 }
+
+// ---------- nutrition / food handlers ----------
+
+type FoodLogEntry struct {
+	ID        int       `json:"id"`
+	LogDate   string    `json:"logDate"`
+	MealName  string    `json:"mealName"`
+	Calories  int       `json:"calories"`
+	Protein   float64   `json:"protein"`
+	Fat       float64   `json:"fat"`
+	Carbs     float64   `json:"carbs"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func nutritionAnalyzeHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var body struct {
+		Text  string `json:"text"`
+		Image string `json:"image"`
+		Mime  string `json:"mime"`
+	}
+	if err := decodeJSON(r, &body); err != nil {
+		writeError(w, 400, "неверный формат запроса")
+		return
+	}
+
+	if body.Text == "" && body.Image == "" {
+		writeError(w, 400, "предоставьте фото или описание еды")
+		return
+	}
+
+	res, err := AnalyzeFoodWithGemini(ctx, body.Text, body.Image, body.Mime)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+
+	writeJSON(w, 200, res)
+}
+
+func nutritionTodayHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	s, err := getSettings(ctx)
+	if err != nil {
+		writeError(w, 500, "ошибка получения настроек")
+		return
+	}
+
+	today := time.Now().UTC().Format("2006-01-02")
+	rows, err := pool.Query(ctx, `
+		SELECT id, log_date, meal_name, calories, protein, fat, carbs, created_at 
+		FROM food_logs 
+		WHERE log_date = $1 
+		ORDER BY created_at DESC
+	`, today)
+	if err != nil {
+		writeError(w, 500, "ошибка чтения дневника питания")
+		return
+	}
+	defer rows.Close()
+
+	logs := []FoodLogEntry{}
+	var totalCal int
+	var totalP, totalF, totalC float64
+
+	for rows.Next() {
+		var item FoodLogEntry
+		var logDate time.Time
+		if err := rows.Scan(&item.ID, &logDate, &item.MealName, &item.Calories, &item.Protein, &item.Fat, &item.Carbs, &item.CreatedAt); err != nil {
+			continue
+		}
+		item.LogDate = logDate.Format("2006-01-02")
+		totalCal += item.Calories
+		totalP += item.Protein
+		totalF += item.Fat
+		totalC += item.Carbs
+		logs = append(logs, item)
+	}
+
+	writeJSON(w, 200, map[string]any{
+		"calorieGoal":   s.CalorieGoal,
+		"totalCalories": totalCal,
+		"totalProtein":  totalP,
+		"totalFat":      totalF,
+		"totalCarbs":    totalC,
+		"logs":          logs,
+	})
+}
+
+func nutritionLogHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var body struct {
+		MealName string  `json:"mealName"`
+		Calories int     `json:"calories"`
+		Protein  float64 `json:"protein"`
+		Fat      float64 `json:"fat"`
+		Carbs    float64 `json:"carbs"`
+		RawJSON  string  `json:"rawJson,omitempty"`
+	}
+	if err := decodeJSON(r, &body); err != nil || body.MealName == "" {
+		writeError(w, 400, "укажите название блюда")
+		return
+	}
+
+	today := time.Now().UTC().Format("2006-01-02")
+	var newID int
+	err := pool.QueryRow(ctx, `
+		INSERT INTO food_logs (log_date, meal_name, calories, protein, fat, carbs, ai_raw_json)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING id
+	`, today, body.MealName, body.Calories, body.Protein, body.Fat, body.Carbs, body.RawJSON).Scan(&newID)
+	if err != nil {
+		writeError(w, 500, "ошибка сохранения блюда")
+		return
+	}
+
+	writeJSON(w, 200, map[string]any{"ok": true, "id": newID})
+}
+
+func nutritionLogItemHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		writeError(w, 400, "неверный id")
+		return
+	}
+
+	if r.Method == http.MethodDelete {
+		_, err := pool.Exec(ctx, `DELETE FROM food_logs WHERE id=$1`, id)
+		if err != nil {
+			writeError(w, 500, "ошибка удаления записи")
+			return
+		}
+		writeJSON(w, 200, map[string]bool{"ok": true})
+		return
+	}
+
+	writeError(w, 405, "метод не поддерживается")
+}
+
+func workoutAdviceHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var body struct {
+		ExerciseName string `json:"exerciseName"`
+		Question     string `json:"question"`
+	}
+	if err := decodeJSON(r, &body); err != nil || body.ExerciseName == "" {
+		writeError(w, 400, "укажите название упражнения")
+		return
+	}
+
+	advice, err := AskWorkoutTrainer(ctx, body.ExerciseName, body.Question)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+
+	writeJSON(w, 200, map[string]string{"advice": advice})
+}
+
+

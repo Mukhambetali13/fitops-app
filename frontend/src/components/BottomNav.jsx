@@ -1,7 +1,8 @@
-import { Home, CalendarDays, Dumbbell, Cigarette, TrendingUp } from "lucide-react";
+import { Home, CalendarDays, Dumbbell, Utensils, Cigarette, TrendingUp } from "lucide-react";
 
 const TABS = [
   { id: "home", label: "Главная", icon: Home },
+  { id: "food", label: "Питание", icon: Utensils },
   { id: "roster", label: "Расписание", icon: CalendarDays },
   { id: "workouts", label: "Тренировки", icon: Dumbbell },
   { id: "smoke", label: "Курение", icon: Cigarette },

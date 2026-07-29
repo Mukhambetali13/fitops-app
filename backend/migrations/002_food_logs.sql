@@ -1,0 +1,15 @@
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS calorie_goal INTEGER NOT NULL DEFAULT 2000;
+
+CREATE TABLE IF NOT EXISTS food_logs (
+    id SERIAL PRIMARY KEY,
+    log_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    meal_name TEXT NOT NULL,
+    calories INTEGER NOT NULL DEFAULT 0,
+    protein NUMERIC NOT NULL DEFAULT 0,
+    fat NUMERIC NOT NULL DEFAULT 0,
+    carbs NUMERIC NOT NULL DEFAULT 0,
+    ai_raw_json TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_food_logs_date ON food_logs(log_date);
